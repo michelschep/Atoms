@@ -616,9 +616,31 @@ function updateParticles(particles) {
   console.log('✓ Task 4.5: bond pair collection tests passed');
 }
 
+let particles = [];
+const DEFAULT_COUNTS = [10, 10, 10, 10, 10, 10, 10]; // 10 per type = 70 total
+
+// Creates all particles for the simulation.
+// counts[i] = number of particles of type i to create.
+// Particles are placed at random positions with a small random initial velocity.
+function initParticles(counts = DEFAULT_COUNTS) {
+  _nextPhasexOffset = 0;
+  particles = [];
+  for (let typeId = 0; typeId < counts.length; typeId++) {
+    const t = PARTICLE_TYPES[typeId];
+    for (let i = 0; i < counts[typeId]; i++) {
+      const p = createParticle(typeId, random(width), random(height));
+      p.vx = random(-t.maxSpeed * 0.3, t.maxSpeed * 0.3);
+      p.vy = random(-t.maxSpeed * 0.3, t.maxSpeed * 0.3);
+      particles.push(p);
+    }
+  }
+}
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');
+  colorMode(RGB, 255);
+  initParticles();
 }
 
 function draw() {

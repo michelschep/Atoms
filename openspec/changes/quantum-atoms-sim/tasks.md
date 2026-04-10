@@ -30,8 +30,8 @@
 
 ## 5. Simulatie Loop
 
-- [ ] 5.1 Implementeer `setup()`: canvas aanmaken (900×700), deeltjes initialiseren
-- [ ] 5.2 Implementeer `initParticles(counts)` die deeltjes aanmaakt op willekeurige posities
+- [x] 5.1 Implementeer `setup()`: canvas aanmaken (900×700), deeltjes initialiseren
+- [x] 5.2 Implementeer `initParticles(counts)` die deeltjes aanmaakt op willekeurige posities
 - [ ] 5.3 Implementeer `draw()` in correcte volgorde: fade achtergrond → forces → update → wrap → render
 - [ ] 5.4 Implementeer motion-blur via `background(0, 0, 0, 25)` (semi-transparant)
 
