@@ -46,6 +46,10 @@ function createParticle(typeId, x, y) {
     _nextPhasexOffset = (_nextPhasexOffset + _PHASE_STEP) % (Math.PI * 2);
   }
 
+  if (typeId === 1) { // Vortaar — rotates slowly around its own axis
+    p.rotAngle = 0;
+  }
+
   if (typeId === 6) { // Fluxar
     p.chaosSign = 1;
     p.chaosTick = 0;
@@ -660,7 +664,8 @@ function drawBondLines(bonds) {
 }
 
 // Draws a single particle: large semi-transparent outer glow + bright solid core.
-// Vortaar rotation visualisation is added in task 6.2.
+// Vortaar (type 1) gets an additional orbiting ring of 3 small dots that rotate
+// around the core, visualising its "rotates around its own axis" trait.
 function drawParticle(p) {
   const c = color(p.color);
   const r = red(c), g = green(c), b = blue(c);
@@ -677,6 +682,16 @@ function drawParticle(p) {
   // Bright core
   fill(r, g, b, 220);
   circle(p.x, p.y, 6);
+
+  // Vortaar-specific: 3 small dots orbiting the core
+  if (p.type === 1) {
+    const orbitRadius = 10;
+    fill(r, g, b, 160);
+    for (let i = 0; i < 3; i++) {
+      const ang = p.rotAngle + (i * TWO_PI / 3);
+      circle(p.x + cos(ang) * orbitRadius, p.y + sin(ang) * orbitRadius, 4);
+    }
+  }
 }
 
 function draw() {
@@ -686,8 +701,11 @@ function draw() {
   // 2. Compute pairwise forces and collect bond pairs
   const bonds = applyForces(particles, frameCount);
 
-  // 3. Advance Fluxar chaos clock (chaosSign flips every 120 frames)
-  for (const p of particles) tickFluxar(p);
+  // 3. Advance Fluxar chaos clock and Vortaar rotation angle
+  for (const p of particles) {
+    tickFluxar(p);
+    if (p.rotAngle !== undefined) p.rotAngle += 0.04;
+  }
 
   // 4. Integrate velocities and update positions
   updateParticles(particles);
