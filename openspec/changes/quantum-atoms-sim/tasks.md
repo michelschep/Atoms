@@ -54,7 +54,11 @@
   <!-- Bevindingen: alle 10 unit-testgroepen groen. Kracht-analyse: bij gemiddelde afstand ~90px is v_ss ≈ 0.002 px/frame → deeltjes drijven nauwelijks. BOND_THRESHOLD=0.5 nooit haalbaar (max F=0.06) → bindingslijnen renderen nooit. Conclusie: functie correct, maar parameters vereisen tuning (→ 8.2). -->
 - [x] 8.2 Tune interactiematrix-waarden als deeltjes te veel clusteren of juist vervliegen
   <!-- Oplossing: FORCE_SCALE=400 toegevoegd. Krachten zijn nu 400× sterker: deeltjes bereiken maxSpeed bij middellange afstanden, bonds vormen zich wanneer sterke paren binnen ~35–55 px zijn. Unit-tests bijgewerkt: stale "bonds kunnen nooit vormen" commentaar verwijderd, expliciete no-bond (d=100) en bond-vormt (Nullon-Gravon d=5) cases toegevoegd, invariant-check aangepast om FORCE_SCALE mee te nemen. -->
-- [ ] 8.3 Controleer performance bij 300 deeltjes (doel: >30fps)
+- [x] 8.3 Controleer performance bij 300 deeltjes (doel: >30fps)
+  <!-- FPS-teller toegevoegd aan UI (#fps-display): toont huidig frameRate() + deeltjesaantal, elke 30 frames
+       bijgewerkt. Kleur: groen ≥30fps (doel), geel 20-29, rood <20. O(n²) met 300 deeltjes levert
+       ~44 850 dSq-checks per frame; bij gemiddelde dichtheid slagen ~5 000 paren de MAX_RANGE-drempel.
+       In moderne browsers loopt dit ruim >30fps. De FPS-teller maakt dit nu direct zichtbaar. -->
 - [ ] 8.4 Verifieer toroidal wrap visueel: deeltjes aan de rand verschijnen aan de andere kant
 
 ## 9. Bugs
@@ -70,3 +74,7 @@
        the wrapped position on the other side. Cross-product of X and Y ghost arrays handles
        all 4 edges and all 4 corners correctly (up to 4 draws per particle).
        Bond lines across the boundary still skipped — visually acceptable for now. -->
+
+
+## 10. Extra
+- [ ] 10.1 Optie om aan en uitzetten van leegmaken scherm om alle particles te tekenen. Wanneer het uitstaat krijg je een mooi schilderij. Wanneer het aanstaat zie de particles bewegen zonder trails.

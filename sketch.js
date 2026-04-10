@@ -846,4 +846,16 @@ function draw() {
   // 6. Render bond lines first so particles appear on top
   drawBondLines(bonds);
   for (const p of particles) drawParticle(p);
+
+  // 7. Update FPS display every 30 frames so it is readable without jitter.
+  //    frameRate() is p5.js's built-in rolling average.
+  //    Green ≥ 30 fps (target), yellow 20-29, red < 20.
+  if (frameCount % 30 === 0) {
+    const fpsEl = document.getElementById('fps-display');
+    if (fpsEl) {
+      const fps = Math.round(frameRate());
+      fpsEl.textContent = `FPS: ${fps} | ${particles.length} particles`;
+      fpsEl.className = fps >= 30 ? 'fps-good' : fps >= 20 ? 'fps-warn' : 'fps-bad';
+    }
+  }
 }

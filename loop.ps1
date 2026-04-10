@@ -59,7 +59,7 @@ while ($true) {
     Write-Host "   $($next.Task)" -ForegroundColor White
     Write-Host ""
 
-    copilot --experimental --agent ralph --prompt "implement the next task"
+    copilot --experimental --yolo --agent ralph --prompt "implement the next task"
 
     Write-Host "`n📤 Pushen..." -ForegroundColor Cyan
     git push origin $branch 2>$null

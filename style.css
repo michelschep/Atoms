@@ -90,6 +90,18 @@ body {
   background: #333358;
 }
 
+#fps-display {
+  font-size: 11px;
+  text-align: center;
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.fps-good { color: #40c080; }
+.fps-warn { color: #c0a040; }
+.fps-bad  { color: #c04040; }
+
 #sliders {
   display: flex;
   flex-direction: column;
