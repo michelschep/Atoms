@@ -46,6 +46,11 @@ function createParticle(typeId, x, y) {
     _nextPhasexOffset = (_nextPhasexOffset + _PHASE_STEP) % (Math.PI * 2);
   }
 
+  if (typeId === 6) { // Fluxar
+    p.chaosSign = 1;
+    p.chaosTick = 0;
+  }
+
   return p;
 }
 
@@ -54,6 +59,18 @@ function createParticle(typeId, x, y) {
 function getPhase(particle, fc) {
   if (particle.phaseOffset === undefined) return 0;
   return Math.sin(fc * 0.02 + particle.phaseOffset);
+}
+
+// Advances a Fluxar particle's chaos clock by one frame.
+// Flips chaosSign (+1 ↔ -1) every 120 frames and resets the tick counter.
+// No-op for non-Fluxar particles.
+function tickFluxar(particle) {
+  if (particle.chaosSign === undefined) return;
+  particle.chaosTick++;
+  if (particle.chaosTick >= 120) {
+    particle.chaosSign *= -1;
+    particle.chaosTick = 0;
+  }
 }
 
 // --- Unit tests (run at load time) ---
@@ -77,6 +94,32 @@ function getPhase(particle, fc) {
 
   _nextPhasexOffset = 0; // reset so simulation starts fresh
   console.log('✓ Task 2.3: Phasex phaseOffset and getPhase tests passed');
+}
+
+// --- Unit tests for task 2.4 ---
+{
+  const fluxar = createParticle(6, 0, 0);
+  console.assert(fluxar.chaosSign === 1 || fluxar.chaosSign === -1, '2.4: Fluxar should have chaosSign');
+  console.assert(fluxar.chaosTick === 0, '2.4: Fluxar should start with chaosTick 0');
+
+  const initialSign = fluxar.chaosSign;
+  for (let i = 0; i < 119; i++) tickFluxar(fluxar);
+  console.assert(fluxar.chaosSign === initialSign, '2.4: chaosSign should not flip before 120 ticks');
+
+  tickFluxar(fluxar); // 120th tick — should flip
+  console.assert(fluxar.chaosSign === -initialSign, '2.4: chaosSign should flip after 120 ticks');
+  console.assert(fluxar.chaosTick === 0, '2.4: chaosTick should reset to 0 after flip');
+
+  // Verify a second flip happens after another 120 ticks
+  for (let i = 0; i < 120; i++) tickFluxar(fluxar);
+  console.assert(fluxar.chaosSign === initialSign, '2.4: chaosSign should flip back after second 120-tick cycle');
+
+  const lumion = createParticle(0, 0, 0);
+  console.assert(lumion.chaosSign === undefined, '2.4: Non-Fluxar should not have chaosSign');
+  tickFluxar(lumion); // should be a no-op
+  console.assert(lumion.chaosSign === undefined, '2.4: tickFluxar on non-Fluxar should be no-op');
+
+  console.log('✓ Task 2.4: Fluxar chaosSign and chaosTick tests passed');
 }
 
 function setup() {
