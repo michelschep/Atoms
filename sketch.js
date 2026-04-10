@@ -389,6 +389,43 @@ function applyForces(particles, fc, w = width, h = height) {
   console.log('✓ Task 4.1: applyForces tests passed');
 }
 
+// --- Unit tests for task 4.2: MIN_DIST clamp ---
+{
+  const W = 900, H = 700;
+
+  // Two Lumion particles at exactly the same spot (d=0): early-exit, ax stays 0 (see 4.1 test).
+  // Two particles closer than MIN_DIST should produce the same force as MIN_DIST apart,
+  // preventing singularities. We compare ax for d=2 vs d=5 (both clamped to MIN_DIST=5).
+  function makeLumion(x, y) {
+    _nextPhasexOffset = 0;
+    return createParticle(0, x, y);
+  }
+
+  // At d=2 (<MIN_DIST): force uses dClamped=5 → F = 0.8 / 25 = 0.032
+  const a2 = makeLumion(400, 350);
+  const b2 = makeLumion(402, 350); // d=2
+  applyForces([a2, b2], 0, W, H);
+  const ax_d2 = a2.ax;
+
+  // At d=5 (==MIN_DIST): same dClamped=5 → same F
+  const a5 = makeLumion(400, 350);
+  const b5 = makeLumion(405, 350); // d=5
+  applyForces([a5, b5], 0, W, H);
+  const ax_d5 = a5.ax;
+
+  console.assert(isFinite(ax_d2), '4.2: ax at d=2 should be finite (no singularity)');
+  console.assert(Math.abs(ax_d2 - ax_d5) < 1e-10, `4.2: ax at d=2 should equal ax at d=5 (both clamped to MIN_DIST), got ${ax_d2} vs ${ax_d5}`);
+
+  // At d=10 (>MIN_DIST): no clamping, force should be smaller than at MIN_DIST
+  const a10 = makeLumion(400, 350);
+  const b10 = makeLumion(410, 350); // d=10
+  applyForces([a10, b10], 0, W, H);
+  console.assert(Math.abs(a10.ax) < Math.abs(ax_d5), '4.2: force at d=10 should be smaller than at d=5 (inverse square law)');
+
+  _nextPhasexOffset = 0;
+  console.log('✓ Task 4.2: MIN_DIST clamp tests passed');
+}
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');
