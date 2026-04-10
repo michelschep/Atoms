@@ -426,6 +426,55 @@ function applyForces(particles, fc, w = width, h = height) {
   console.log('✓ Task 4.2: MIN_DIST clamp tests passed');
 }
 
+// Integrates acceleration into velocity, applies DAMPING, then updates position.
+// Call once per frame after applyForces() and before wrapPosition().
+function updateParticles(particles) {
+  for (const p of particles) {
+    p.vx = (p.vx + p.ax) * DAMPING;
+    p.vy = (p.vy + p.ay) * DAMPING;
+    p.x += p.vx;
+    p.y += p.vy;
+  }
+}
+
+// --- Unit tests for task 4.3: DAMPING ---
+{
+  // Velocity decays by DAMPING each frame with zero acceleration
+  const p = createParticle(0, 100, 100);
+  p.ax = 0; p.ay = 0;
+  p.vx = 10; p.vy = 0;
+
+  updateParticles([p]);
+  console.assert(Math.abs(p.vx - 10 * DAMPING) < 1e-10,
+    `4.3: vx after 1 frame should be ${10 * DAMPING}, got ${p.vx}`);
+
+  updateParticles([p]);
+  console.assert(Math.abs(p.vx - 10 * DAMPING * DAMPING) < 1e-10,
+    `4.3: vx after 2 frames should be ${10 * DAMPING * DAMPING}, got ${p.vx}`);
+
+  // Acceleration is integrated before damping: v_new = (v + a) * DAMPING
+  const p2 = createParticle(0, 0, 0);
+  p2.vx = 0; p2.vy = 0;
+  p2.ax = 2; p2.ay = 0;
+  updateParticles([p2]);
+  console.assert(Math.abs(p2.vx - 2 * DAMPING) < 1e-10,
+    `4.3: vx from rest with ax=2 should be ${2 * DAMPING}, got ${p2.vx}`);
+
+  // Position is updated by the post-damping velocity
+  const p3 = createParticle(0, 50, 80);
+  p3.vx = 5; p3.vy = -3;
+  p3.ax = 0; p3.ay = 0;
+  const expectedVx = 5 * DAMPING;
+  const expectedVy = -3 * DAMPING;
+  updateParticles([p3]);
+  console.assert(Math.abs(p3.x - (50 + expectedVx)) < 1e-10,
+    `4.3: x should be ${50 + expectedVx}, got ${p3.x}`);
+  console.assert(Math.abs(p3.y - (80 + expectedVy)) < 1e-10,
+    `4.3: y should be ${80 + expectedVy}, got ${p3.y}`);
+
+  console.log('✓ Task 4.3: updateParticles DAMPING tests passed');
+}
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');

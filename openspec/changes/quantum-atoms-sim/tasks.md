@@ -24,7 +24,7 @@
 
 - [x] 4.1 Implementeer `applyForces(particles)` O(n²) loop met `MAX_RANGE = 150` early-exit
 - [x] 4.2 Voeg `MIN_DIST = 5` clamp toe in de kracht-formule
-- [ ] 4.3 Implementeer `DAMPING = 0.98` snelheids-damping na elke update
+- [x] 4.3 Implementeer `DAMPING = 0.98` snelheids-damping na elke update
 - [ ] 4.4 Clip snelheid op `maxSpeed` na force-toepassing
 - [ ] 4.5 Verzamel paren met `|F| > BOND_THRESHOLD (0.5)` voor bindingslijn-rendering
 
