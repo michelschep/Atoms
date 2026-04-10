@@ -69,7 +69,8 @@ body {
   gap: 8px;
 }
 
-#pause-btn {
+#pause-btn,
+#trails-btn {
   background: #1e1e30;
   color: #c0c0e0;
   border: 1px solid #3a3a60;
@@ -81,16 +82,24 @@ body {
   flex-shrink: 0;
 }
 
-#pause-btn:hover {
+#pause-btn:hover,
+#trails-btn:hover {
   background: #2a2a46;
   border-color: #5a5a90;
 }
 
-#pause-btn:active {
+#pause-btn:active,
+#trails-btn:active {
   background: #333358;
 }
 
-#fps-display {
+#trails-btn.active {
+  background: #1a2a1a;
+  border-color: #507050;
+  color: #80d080;
+}
+
+
   font-size: 11px;
   text-align: center;
   padding: 4px 0;

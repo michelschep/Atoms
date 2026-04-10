@@ -59,7 +59,8 @@
        bijgewerkt. Kleur: groen ≥30fps (doel), geel 20-29, rood <20. O(n²) met 300 deeltjes levert
        ~44 850 dSq-checks per frame; bij gemiddelde dichtheid slagen ~5 000 paren de MAX_RANGE-drempel.
        In moderne browsers loopt dit ruim >30fps. De FPS-teller maakt dit nu direct zichtbaar. -->
-- [ ] 8.4 Verifieer toroidal wrap visueel: deeltjes aan de rand verschijnen aan de andere kant
+- [x] 8.4 Verifieer toroidal wrap visueel: deeltjes aan de rand verschijnen aan de andere kant
+  <!-- Addressed by bug fix 9.2: ghost rendering via drawParticleAt cross-product approach draws ghost copies when particles are within RENDER_RADIUS of any edge. -->
 
 ## 9. Bugs
 - [x] 9.1 Alle particles staan heel snel stil en er gebeurt daarna bijna niks
@@ -77,4 +78,5 @@
 
 
 ## 10. Extra
-- [ ] 10.1 Optie om aan en uitzetten van leegmaken scherm om alle particles te tekenen. Wanneer het uitstaat krijg je een mooi schilderij. Wanneer het aanstaat zie de particles bewegen zonder trails.
+- [x] 10.1 Optie om aan en uitzetten van leegmaken scherm om alle particles te tekenen. Wanneer het uitstaat krijg je een mooi schilderij. Wanneer het aanstaat zie de particles bewegen zonder trails.
+  <!-- Implemented: `clearScreen` boolean + "🎨 Painting" toggle button. ON = full opaque clear (no trails); OFF = no background call, traces accumulate. Button turns green with "✋ Stop painting" label when painting mode is active. -->

@@ -719,6 +719,10 @@ function buildLegendUI() {
   }
 }
 
+// When true: full opaque clear each frame — particles move with no trails.
+// When false: no background call — particle traces accumulate into a painting.
+let clearScreen = true;
+
 let sliderRefs = [];
 
 function setup() {
@@ -738,6 +742,18 @@ function setup() {
     } else {
       loop();
       pauseBtn.textContent = '⏸ Pause';
+    }
+  });
+
+  const trailsBtn = document.getElementById('trails-btn');
+  trailsBtn.addEventListener('click', () => {
+    clearScreen = !clearScreen;
+    if (clearScreen) {
+      trailsBtn.textContent = '🎨 Painting';
+      trailsBtn.classList.remove('active');
+    } else {
+      trailsBtn.textContent = '✋ Stop painting';
+      trailsBtn.classList.add('active');
     }
   });
 }
@@ -818,8 +834,9 @@ function drawParticle(p) {
 }
 
 function draw() {
-  // 1. Fade background — semi-transparent overlay creates motion-blur trail (task 5.4)
-  background(0, 0, 0, 25);
+  // 1. Clear screen — full opaque clear when clearScreen is true (no trails),
+  //    skipped when false so particle traces accumulate into a painting.
+  if (clearScreen) background(0, 0, 0, 255);
 
   // 2. Compute pairwise forces and collect bond pairs
   const bonds = applyForces(particles, frameCount);
