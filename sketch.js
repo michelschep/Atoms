@@ -640,11 +640,65 @@ function initParticles(counts = DEFAULT_COUNTS) {
   }
 }
 
+// Builds the slider UI for all particle types in the #sliders container.
+// Each slider row contains a color dot, a type name, and a count display.
+// Returns an array of { slider, countEl } in PARTICLE_TYPES order.
+function buildSliderUI() {
+  const container = document.getElementById('sliders');
+  const refs = [];
+
+  for (const t of PARTICLE_TYPES) {
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+
+    const label = document.createElement('div');
+    label.className = 'slider-label';
+
+    const dot = document.createElement('span');
+    dot.className = 'slider-dot';
+    dot.style.background = t.color;
+
+    const name = document.createElement('span');
+    name.textContent = t.name;
+
+    const countEl = document.createElement('span');
+    countEl.className = 'slider-count';
+    countEl.textContent = String(DEFAULT_COUNTS[t.id]);
+
+    label.appendChild(dot);
+    label.appendChild(name);
+    label.appendChild(countEl);
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '50';
+    slider.value = String(DEFAULT_COUNTS[t.id]);
+    slider.dataset.typeId = String(t.id);
+
+    slider.addEventListener('input', () => {
+      countEl.textContent = slider.value;
+    });
+
+    row.appendChild(label);
+    row.appendChild(slider);
+    container.appendChild(row);
+
+    refs.push({ slider, countEl });
+  }
+
+  return refs;
+}
+
+let sliderRefs = [];
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');
   colorMode(RGB, 255);
   initParticles();
+
+  sliderRefs = buildSliderUI();
 
   const pauseBtn = document.getElementById('pause-btn');
   pauseBtn.addEventListener('click', () => {
