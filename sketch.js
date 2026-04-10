@@ -8,6 +8,22 @@ const PARTICLE_TYPES = [
   { id: 6, name: 'Fluxar',  color: '#FF6600', mass: 1.0, maxSpeed: 4.0 },
 ];
 
+// ±phase: resolved at runtime via Phasex sin() oscillation
+// ±chaos: resolved at runtime via Fluxar chaosSign
+const PHASE = 'PHASE';
+const CHAOS = 'CHAOS';
+
+//          [Lumion, Vortaar, Nullon,  Phasex, Gravon, Chromax, Fluxar]
+const INTERACTION_MATRIX = [
+  /* Lumion  */ [ +0.8,   +1.2,   -0.3,   PHASE,  +0.4,   0.0,    CHAOS ],
+  /* Vortaar */ [ +1.2,   -0.6,   +0.9,    0.0,   +0.3,   -0.5,   CHAOS ],
+  /* Nullon  */ [ -0.3,   +0.9,   -0.2,   PHASE,  +1.5,    0.0,    0.0  ],
+  /* Phasex  */ [ PHASE,   0.0,   PHASE,  PHASE,  -0.7,   +1.1,   CHAOS ],
+  /* Gravon  */ [ +0.4,   +0.3,   +1.5,   -0.7,   -1.0,   +0.6,   +0.2 ],
+  /* Chromax */ [  0.0,   -0.5,    0.0,   +1.1,   +0.6,   +1.3,   -0.8 ],
+  /* Fluxar  */ [ CHAOS,  CHAOS,   0.0,   CHAOS,  +0.2,   -0.8,    0.0  ],
+];
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');
