@@ -1,7 +1,7 @@
 ## 1. Project Setup
 
 - [x] 1.1 Maak `index.html` aan met p5.js CDN-link, canvas-container en UI-paneel
-- [ ] 1.2 Maak `style.css` aan met dark-theme layout (canvas links, controls rechts)
+- [x] 1.2 Maak `style.css` aan met dark-theme layout (canvas links, controls rechts)
 - [ ] 1.3 Maak `sketch.js` aan met lege `setup()` en `draw()` functies
 - [ ] 1.4 Verifieer dat de pagina laadt via `npx serve .` zonder fouten
 
