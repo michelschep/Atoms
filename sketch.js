@@ -426,12 +426,21 @@ function applyForces(particles, fc, w = width, h = height) {
   console.log('✓ Task 4.2: MIN_DIST clamp tests passed');
 }
 
-// Integrates acceleration into velocity, applies DAMPING, then updates position.
+// Integrates acceleration into velocity, applies DAMPING, clips to maxSpeed,
+// then updates position.
 // Call once per frame after applyForces() and before wrapPosition().
 function updateParticles(particles) {
   for (const p of particles) {
     p.vx = (p.vx + p.ax) * DAMPING;
     p.vy = (p.vy + p.ay) * DAMPING;
+
+    const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+    if (speed > p.maxSpeed) {
+      const scale = p.maxSpeed / speed;
+      p.vx *= scale;
+      p.vy *= scale;
+    }
+
     p.x += p.vx;
     p.y += p.vy;
   }
@@ -440,17 +449,18 @@ function updateParticles(particles) {
 // --- Unit tests for task 4.3: DAMPING ---
 {
   // Velocity decays by DAMPING each frame with zero acceleration
+  // Use vx=2 (below Lumion's maxSpeed=3.5) to test DAMPING without hitting the clip
   const p = createParticle(0, 100, 100);
   p.ax = 0; p.ay = 0;
-  p.vx = 10; p.vy = 0;
+  p.vx = 2; p.vy = 0;
 
   updateParticles([p]);
-  console.assert(Math.abs(p.vx - 10 * DAMPING) < 1e-10,
-    `4.3: vx after 1 frame should be ${10 * DAMPING}, got ${p.vx}`);
+  console.assert(Math.abs(p.vx - 2 * DAMPING) < 1e-10,
+    `4.3: vx after 1 frame should be ${2 * DAMPING}, got ${p.vx}`);
 
   updateParticles([p]);
-  console.assert(Math.abs(p.vx - 10 * DAMPING * DAMPING) < 1e-10,
-    `4.3: vx after 2 frames should be ${10 * DAMPING * DAMPING}, got ${p.vx}`);
+  console.assert(Math.abs(p.vx - 2 * DAMPING * DAMPING) < 1e-10,
+    `4.3: vx after 2 frames should be ${2 * DAMPING * DAMPING}, got ${p.vx}`);
 
   // Acceleration is integrated before damping: v_new = (v + a) * DAMPING
   const p2 = createParticle(0, 0, 0);
@@ -461,11 +471,12 @@ function updateParticles(particles) {
     `4.3: vx from rest with ax=2 should be ${2 * DAMPING}, got ${p2.vx}`);
 
   // Position is updated by the post-damping velocity
+  // Use vx=2, vy=-1 (speed≈2.24, after DAMPING≈2.19, below Lumion maxSpeed=3.5)
   const p3 = createParticle(0, 50, 80);
-  p3.vx = 5; p3.vy = -3;
+  p3.vx = 2; p3.vy = -1;
   p3.ax = 0; p3.ay = 0;
-  const expectedVx = 5 * DAMPING;
-  const expectedVy = -3 * DAMPING;
+  const expectedVx = 2 * DAMPING;
+  const expectedVy = -1 * DAMPING;
   updateParticles([p3]);
   console.assert(Math.abs(p3.x - (50 + expectedVx)) < 1e-10,
     `4.3: x should be ${50 + expectedVx}, got ${p3.x}`);
@@ -473,6 +484,50 @@ function updateParticles(particles) {
     `4.3: y should be ${80 + expectedVy}, got ${p3.y}`);
 
   console.log('✓ Task 4.3: updateParticles DAMPING tests passed');
+}
+
+// --- Unit tests for task 4.4: maxSpeed clipping ---
+{
+  // Velocity above maxSpeed is clipped to maxSpeed (magnitude), direction preserved
+  const p = createParticle(0, 0, 0); // Lumion, maxSpeed=3.5
+  p.ax = 0; p.ay = 0;
+  p.vx = 10; p.vy = 0; // well above maxSpeed
+  updateParticles([p]);
+  const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+  console.assert(speed <= p.maxSpeed + 1e-10,
+    `4.4: speed should be clipped to maxSpeed=${p.maxSpeed}, got ${speed}`);
+  console.assert(p.vx > 0, '4.4: direction (positive x) should be preserved after clipping');
+  console.assert(Math.abs(p.vy) < 1e-10, '4.4: vy should remain 0 (direction preserved)');
+
+  // Velocity below maxSpeed is NOT clipped
+  const p2 = createParticle(0, 0, 0); // Lumion, maxSpeed=3.5
+  p2.ax = 0; p2.ay = 0;
+  p2.vx = 1; p2.vy = 0; // 1 * DAMPING = 0.98, well below 3.5
+  updateParticles([p2]);
+  console.assert(Math.abs(p2.vx - 1 * DAMPING) < 1e-10,
+    `4.4: velocity below maxSpeed should not be clipped, got ${p2.vx}`);
+
+  // Diagonal velocity clipped preserves direction
+  const p3 = createParticle(6, 0, 0); // Fluxar, maxSpeed=4.0
+  p3.ax = 0; p3.ay = 0;
+  p3.vx = 20; p3.vy = 20;
+  updateParticles([p3]);
+  const speed3 = Math.sqrt(p3.vx * p3.vx + p3.vy * p3.vy);
+  console.assert(speed3 <= p3.maxSpeed + 1e-10,
+    `4.4: diagonal speed should be clipped to maxSpeed=${p3.maxSpeed}, got ${speed3}`);
+  console.assert(Math.abs(p3.vx - p3.vy) < 1e-10,
+    '4.4: diagonal clipping should preserve equal vx/vy ratio');
+
+  // Different particle types respect their own maxSpeed
+  const gravon = createParticle(4, 0, 0); // Gravon, maxSpeed=0.8
+  gravon.ax = 0; gravon.ay = 0;
+  gravon.vx = 5; gravon.vy = 0;
+  updateParticles([gravon]);
+  const speedGravon = Math.sqrt(gravon.vx * gravon.vx + gravon.vy * gravon.vy);
+  console.assert(speedGravon <= gravon.maxSpeed + 1e-10,
+    `4.4: Gravon speed clipped to maxSpeed=${gravon.maxSpeed}, got ${speedGravon}`);
+
+  console.log('✓ Task 4.4: maxSpeed clipping tests passed');
 }
 
 function setup() {
