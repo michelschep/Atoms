@@ -274,6 +274,121 @@ function toroidalDelta(a, b, dim) {
   console.log('✓ Task 3.4: toroidalDelta shortest-path tests passed');
 }
 
+const MAX_RANGE = 150;
+const MIN_DIST   = 5;
+const DAMPING    = 0.98;
+const BOND_THRESHOLD = 0.5;
+
+// Computes pairwise forces for all particles and accumulates ax/ay on each.
+// Returns an array of bond pairs [{ a, b }] where |F| > BOND_THRESHOLD.
+// Call this once per frame before integrating velocity.
+// w/h default to p5.js globals; pass explicit values in unit tests.
+function applyForces(particles, fc, w = width, h = height) {
+  // Zero out accelerations
+  for (const p of particles) {
+    p.ax = 0;
+    p.ay = 0;
+  }
+
+  const bonds = [];
+  const MAX_RANGE_SQ = MAX_RANGE * MAX_RANGE;
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const a = particles[i];
+      const b = particles[j];
+
+      const dx = toroidalDelta(a.x, b.x, w);
+      const dy = toroidalDelta(a.y, b.y, h);
+      const dSq = dx * dx + dy * dy;
+
+      if (dSq > MAX_RANGE_SQ) continue;
+
+      const d = Math.sqrt(dSq);
+      if (d === 0) continue; // overlapping particles: skip to avoid singularity
+
+      const dClamped = Math.max(d, MIN_DIST);
+      const strength = getForceStrength(a, b, fc);
+      const F = strength / (dClamped * dClamped);
+
+      // Unit vector uses d (not dClamped) to preserve direction accuracy
+      const ux = dx / d;
+      const uy = dy / d;
+
+      a.ax += (F * ux) / a.mass;
+      a.ay += (F * uy) / a.mass;
+      b.ax -= (F * ux) / b.mass;
+      b.ay -= (F * uy) / b.mass;
+
+      if (Math.abs(F) > BOND_THRESHOLD) {
+        bonds.push({ a, b });
+      }
+    }
+  }
+
+  return bonds;
+}
+
+// --- Unit tests for task 4.1 ---
+{
+  _nextPhasexOffset = 0;
+
+  // Use Lumion (type 0): Lumion-Lumion strength = +0.8
+  function makeLumion(x, y) { return createParticle(0, x, y); }
+
+  // Early-exit: particles whose minimum-image distance > MAX_RANGE get zero acceleration
+  {
+    const W = 900, H = 700;
+    const a = makeLumion(100, 350);
+    const b = makeLumion(300, 350); // dx=200 > 150
+    applyForces([a, b], 0, W, H);
+    console.assert(a.ax === 0 && a.ay === 0, '4.1: particles >MAX_RANGE apart get zero ax/ay on a');
+    console.assert(b.ax === 0 && b.ay === 0, '4.1: particles >MAX_RANGE apart get zero ax/ay on b');
+  }
+
+  // Within range: particles get non-zero acceleration
+  {
+    const W = 900, H = 700;
+    const a = makeLumion(100, 350);
+    const b = makeLumion(200, 350); // dx=100 < 150, strength=0.8 → non-zero
+    applyForces([a, b], 0, W, H);
+    console.assert(a.ax !== 0 || a.ay !== 0, '4.1: particles within MAX_RANGE get non-zero acceleration');
+  }
+
+  // Toroidal interaction: near opposite edges interact through the wrap
+  {
+    const W = 900, H = 700;
+    const a = makeLumion(10, 350);
+    const b = makeLumion(890, 350); // screen dist=880, toroidal dist=20
+    applyForces([a, b], 0, W, H);
+    console.assert(a.ax !== 0, '4.1: toroidal pair (opposite edges) gets non-zero acceleration');
+  }
+
+  // Newton's 3rd law: m_a * ax_a ≈ -m_b * ax_b
+  {
+    const W = 900, H = 700;
+    const a = makeLumion(200, 350); // mass=1.0
+    const b = createParticle(4, 280, 350); // Gravon, mass=4.0; dx=80 < 150
+    applyForces([a, b], 0, W, H);
+    const impulseA = a.mass * a.ax;
+    const impulseB = b.mass * b.ax;
+    const diff = Math.abs(impulseA + impulseB);
+    console.assert(diff < 1e-10, `4.1: Newton's 3rd law: impulse sum should be ~0, got ${diff}`);
+  }
+
+  // d===0 edge: overlapping particles → no NaN, no crash
+  {
+    const W = 900, H = 700;
+    const a = makeLumion(200, 200);
+    const b = makeLumion(200, 200); // exact overlap
+    applyForces([a, b], 0, W, H);
+    console.assert(a.ax === 0 && isFinite(a.ax), '4.1: exact overlap → ax stays 0 (no NaN)');
+  }
+
+  _nextPhasexOffset = 0;
+  console.log('✓ Task 4.1: applyForces tests passed');
+}
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');
