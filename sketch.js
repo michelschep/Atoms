@@ -643,5 +643,48 @@ function setup() {
   initParticles();
 }
 
+// Draws a single bond line between two bonded particles.
+// Styling (mixed colours, alpha) will be enhanced in task 6.3.
+function drawBondLines(bonds) {
+  strokeWeight(1);
+  for (const { a, b } of bonds) {
+    const ca = color(a.color);
+    const cb = color(b.color);
+    const mx = (red(ca) + red(cb)) / 2;
+    const my = (green(ca) + green(cb)) / 2;
+    const mz = (blue(ca) + blue(cb)) / 2;
+    stroke(mx, my, mz, 80);
+    line(a.x, a.y, b.x, b.y);
+  }
+  noStroke();
+}
+
+// Draws a single particle as a coloured circle.
+// Outer glow and Vortaar rotation visualisation are added in tasks 6.1 and 6.2.
+function drawParticle(p) {
+  const c = color(p.color);
+  noStroke();
+  fill(red(c), green(c), blue(c), 220);
+  circle(p.x, p.y, 8);
+}
+
 function draw() {
+  // 1. Fade background — semi-transparent overlay creates motion-blur trail (task 5.4)
+  background(0, 0, 0, 25);
+
+  // 2. Compute pairwise forces and collect bond pairs
+  const bonds = applyForces(particles, frameCount);
+
+  // 3. Advance Fluxar chaos clock (chaosSign flips every 120 frames)
+  for (const p of particles) tickFluxar(p);
+
+  // 4. Integrate velocities and update positions
+  updateParticles(particles);
+
+  // 5. Apply toroidal wrapping
+  for (const p of particles) wrapPosition(p);
+
+  // 6. Render bond lines first so particles appear on top
+  drawBondLines(bonds);
+  for (const p of particles) drawParticle(p);
 }
