@@ -26,7 +26,7 @@
 - [x] 4.2 Voeg `MIN_DIST = 5` clamp toe in de kracht-formule
 - [x] 4.3 Implementeer `DAMPING = 0.98` snelheids-damping na elke update
 - [x] 4.4 Clip snelheid op `maxSpeed` na force-toepassing
-- [ ] 4.5 Verzamel paren met `|F| > BOND_THRESHOLD (0.5)` voor bindingslijn-rendering
+- [x] 4.5 Verzamel paren met `|F| > BOND_THRESHOLD (0.5)` voor bindingslijn-rendering
 
 ## 5. Simulatie Loop
 
