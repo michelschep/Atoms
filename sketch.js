@@ -647,17 +647,24 @@ function setup() {
   initParticles();
 }
 
-// Draws a single bond line between two bonded particles.
-// Styling (mixed colours, alpha) will be enhanced in task 6.3.
+// Draws semi-transparent bond lines between strongly-interacting particle pairs.
+// Colour is a 50/50 lerpColor blend of the two particle colours.
+// Bonds that cross the toroidal boundary are skipped to avoid canvas-spanning lines.
 function drawBondLines(bonds) {
-  strokeWeight(1);
+  const W = width, H = height;
+  strokeWeight(1.5);
   for (const { a, b } of bonds) {
+    // Skip bonds whose shortest toroidal path crosses the canvas edge
+    const directDx = Math.abs(b.x - a.x);
+    const directDy = Math.abs(b.y - a.y);
+    const toroidDx = Math.abs(toroidalDelta(a.x, b.x, W));
+    const toroidDy = Math.abs(toroidalDelta(a.y, b.y, H));
+    if (toroidDx < directDx - 0.5 || toroidDy < directDy - 0.5) continue;
+
     const ca = color(a.color);
     const cb = color(b.color);
-    const mx = (red(ca) + red(cb)) / 2;
-    const my = (green(ca) + green(cb)) / 2;
-    const mz = (blue(ca) + blue(cb)) / 2;
-    stroke(mx, my, mz, 80);
+    const mc = lerpColor(ca, cb, 0.5);
+    stroke(red(mc), green(mc), blue(mc), 110);
     line(a.x, a.y, b.x, b.y);
   }
   noStroke();
