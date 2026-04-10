@@ -280,7 +280,7 @@ function toroidalDelta(a, b, dim) {
 
 const MAX_RANGE = 150;
 const MIN_DIST   = 5;
-const DAMPING    = 0.98;
+const DAMPING    = 0.99;
 const BOND_THRESHOLD = 0.5;
 // Global force multiplier. Without this, raw matrix strengths (max 1.5) produce
 // max F = 1.5/(5²) = 0.06 — too weak to reach maxSpeed or BOND_THRESHOLD.
@@ -288,6 +288,12 @@ const BOND_THRESHOLD = 0.5;
 // multiple neighbors combine to push particles toward maxSpeed, creating lively dynamics.
 // Bonds (|F| > 0.5) form when strong pairs are within ~35–55 px.
 const FORCE_SCALE = 400;
+// Short-range universal repulsion zone. ALL pairs repel for d < BETA regardless of type,
+// preventing particle collapse (fusing) and frozen clusters.
+// BETA_REPULSE calibrated so repulsion dominates max type-specific attraction for d < BETA,
+// with a smooth linear ramp to zero at d = BETA (continuous with the outer force).
+const BETA = 10;
+const BETA_REPULSE = FORCE_SCALE * 0.3; // 120 — overcomes max attraction (~24) at d < BETA
 
 // Computes pairwise forces for all particles and accumulates ax/ay on each.
 // Returns an array of bond pairs [{ a, b }] where |F| > BOND_THRESHOLD.
@@ -315,7 +321,16 @@ function applyForces(particles, fc, w = width, h = height) {
       if (dSq > MAX_RANGE_SQ) continue;
 
       const d = Math.sqrt(dSq);
-      if (d === 0) continue; // overlapping particles: skip to avoid singularity
+      if (d === 0) {
+        // Break exact overlap: random impulse separates the pair next frame.
+        // Prevents frozen "dimers" at d=0 where the force skip leaves them stuck.
+        const angle = Math.random() * Math.PI * 2;
+        a.vx += Math.cos(angle) * MIN_DIST;
+        a.vy += Math.sin(angle) * MIN_DIST;
+        b.vx -= Math.cos(angle) * MIN_DIST;
+        b.vy -= Math.sin(angle) * MIN_DIST;
+        continue;
+      }
 
       const dClamped = Math.max(d, MIN_DIST);
       const strength = getForceStrength(a, b, fc);
@@ -332,6 +347,16 @@ function applyForces(particles, fc, w = width, h = height) {
 
       if (Math.abs(F) > BOND_THRESHOLD) {
         bonds.push({ a, b });
+      }
+
+      // Short-range universal repulsion: prevents collapse to d=0.
+      // Force is zero at d=BETA and increases linearly to -BETA_REPULSE at d=0.
+      if (d < BETA) {
+        const repF = BETA_REPULSE * (d / BETA - 1); // ≤ 0 (repulsive)
+        a.ax += (repF * ux) / a.mass;
+        a.ay += (repF * uy) / a.mass;
+        b.ax -= (repF * ux) / b.mass;
+        b.ay -= (repF * uy) / b.mass;
       }
     }
   }
@@ -399,41 +424,42 @@ function applyForces(particles, fc, w = width, h = height) {
   console.log('✓ Task 4.1: applyForces tests passed');
 }
 
-// --- Unit tests for task 4.2: MIN_DIST clamp ---
+// --- Unit tests for task 4.2: short-range repulsion (BETA zone) ---
+// b is placed to the right of a (dx > 0) in all cases.
+// Repulsion pushes a LEFT (ax < 0); type-specific attraction pulls a RIGHT (ax > 0).
 {
   const W = 900, H = 700;
 
-  // Two Lumion particles at exactly the same spot (d=0): early-exit, ax stays 0 (see 4.1 test).
-  // Two particles closer than MIN_DIST should produce the same force as MIN_DIST apart,
-  // preventing singularities. We compare ax for d=2 vs d=5 (both clamped to MIN_DIST=5).
   function makeLumion(x, y) {
     _nextPhasexOffset = 0;
     return createParticle(0, x, y);
   }
 
-  // At d=2 (<MIN_DIST): force uses dClamped=5 → F = 0.8 * FORCE_SCALE / 25
+  // At d=2 (deep inside BETA): repulsion dominates → ax < 0
   const a2 = makeLumion(400, 350);
   const b2 = makeLumion(402, 350); // d=2
   applyForces([a2, b2], 0, W, H);
-  const ax_d2 = a2.ax;
 
-  // At d=5 (==MIN_DIST): same dClamped=5 → same F
+  // At d=5 (inside BETA): repulsion still dominates but weaker than d=2
   const a5 = makeLumion(400, 350);
   const b5 = makeLumion(405, 350); // d=5
   applyForces([a5, b5], 0, W, H);
-  const ax_d5 = a5.ax;
 
-  console.assert(isFinite(ax_d2), '4.2: ax at d=2 should be finite (no singularity)');
-  console.assert(Math.abs(ax_d2 - ax_d5) < 1e-10, `4.2: ax at d=2 should equal ax at d=5 (both clamped to MIN_DIST), got ${ax_d2} vs ${ax_d5}`);
+  console.assert(isFinite(a2.ax), '4.2: ax at d=2 should be finite (no singularity)');
+  console.assert(a2.ax < 0, '4.2: d=2 inside BETA → net repulsion pushes a left (ax < 0)');
+  console.assert(a5.ax < 0, '4.2: d=5 inside BETA → net repulsion (ax < 0)');
+  console.assert(a2.ax < a5.ax, '4.2: d=2 has stronger repulsion than d=5 (closer to core)');
 
-  // At d=10 (>MIN_DIST): no clamping, force should be smaller than at MIN_DIST
+  // At d=BETA=10: repulsion = 0, only type-specific attraction applies
+  // Lumion-Lumion strength = +0.8, d=10 → F = 0.8*FORCE_SCALE/100 > 0 → ax > 0 (toward b)
   const a10 = makeLumion(400, 350);
-  const b10 = makeLumion(410, 350); // d=10
+  const b10 = makeLumion(410, 350); // d=10 == BETA
   applyForces([a10, b10], 0, W, H);
-  console.assert(Math.abs(a10.ax) < Math.abs(ax_d5), '4.2: force at d=10 should be smaller than at d=5 (inverse square law)');
+  console.assert(a10.ax > 0, '4.2: at d=BETA repulsion=0, Lumion-Lumion attraction → ax > 0');
+  console.assert(Math.abs(a10.ax) < Math.abs(a5.ax), '4.2: type-specific force at BETA weaker than inner repulsion at d=5');
 
   _nextPhasexOffset = 0;
-  console.log('✓ Task 4.2: MIN_DIST clamp tests passed');
+  console.log('✓ Task 4.2: short-range repulsion (BETA) tests passed');
 }
 
 // Integrates acceleration into velocity, applies DAMPING, clips to maxSpeed,
@@ -785,6 +811,13 @@ function draw() {
 
   // 4. Integrate velocities and update positions
   updateParticles(particles);
+
+  // 4a. Tiny thermal kicks — prevents complete stillness in symmetric equilibria
+  // (equivalent to low-temperature Brownian motion; magnitude is ~2% of min maxSpeed)
+  for (const p of particles) {
+    p.vx += random(-0.02, 0.02);
+    p.vy += random(-0.02, 0.02);
+  }
 
   // 5. Apply toroidal wrapping
   for (const p of particles) wrapPosition(p);

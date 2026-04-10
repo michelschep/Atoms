@@ -58,4 +58,10 @@
 - [ ] 8.4 Verifieer toroidal wrap visueel: deeltjes aan de rand verschijnen aan de andere kant
 
 ## 9. Bugs
-- [ ] 9.1 Alle particles staan heel snel stil en er gebeurt daarna bijna niks
+- [x] 9.1 Alle particles staan heel snel stil en er gebeurt daarna bijna niks
+  <!-- Root cause: attracting particles collapsed to d=0 (force skipped, DAMPING killed remaining velocity → frozen dimers).
+       Fix: (1) d=0 now gives random separation impulse instead of silent skip; (2) BETA=10px short-range repulsion
+       (BETA_REPULSE=120) prevents collapse; (3) DAMPING 0.98→0.99 slows velocity decay; (4) tiny thermal noise
+       (±0.02 px/frame) in draw() prevents complete freeze in symmetric equilibria.
+       Unit test 4.2 updated: MIN_DIST-clamp equality tests replaced by BETA-repulsion gradient tests. -->
+- [ ] 9.2 Het is nog geen torus (of torusoppervlak).
