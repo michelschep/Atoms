@@ -45,7 +45,7 @@
 
 - [x] 7.1 Voeg pause/play knop toe aan HTML, koppel aan `noLoop()` / `loop()`
 - [x] 7.2 Voeg 7 sliders toe (range 0–50) voor deeltjesaantallen, met kleurlabel per type
-- [ ] 7.3 Bind slider `oninput` events aan `initParticles()` voor herstart
+- [x] 7.3 Bind slider `oninput` events aan `initParticles()` voor herstart
 - [ ] 7.4 Voeg legenda toe met kleur-indicator, naam en korte gedragsbeschrijving per type
 
 ## 8. Afwerking & Tuning

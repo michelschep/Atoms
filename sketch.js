@@ -678,6 +678,8 @@ function buildSliderUI() {
 
     slider.addEventListener('input', () => {
       countEl.textContent = slider.value;
+      const counts = sliderRefs.map(ref => parseInt(ref.slider.value, 10));
+      initParticles(counts);
     });
 
     row.appendChild(label);
