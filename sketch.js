@@ -203,6 +203,14 @@ function wrapPosition(particle, w = width, h = height) {
   particle.y = ((particle.y % h) + h) % h;
 }
 
+// Returns the signed minimum-image delta from coordinate a to coordinate b
+// along a periodic dimension of size dim (minimum image convention).
+// The result is always in [-dim/2, +dim/2).
+function toroidalDelta(a, b, dim) {
+  const d = b - a;
+  return d - dim * Math.round(d / dim);
+}
+
 // --- Unit tests for task 3.1 / 3.3 ---
 {
   const W = 900, H = 700;
@@ -239,6 +247,31 @@ function wrapPosition(particle, w = width, h = height) {
   console.assert(p.x === 400 && p.y === 300, '3.1: in-bounds position unchanged');
 
   console.log('✓ Tasks 3.1 + 3.3: wrapPosition and edge-wrap tests passed');
+}
+
+// --- Unit tests for task 3.4: toroidalDelta shortest-path ---
+{
+  const W = 800;
+
+  // Shortest path: x=10 to x=790 via the wrap → delta = -20 (not +780)
+  const dx = toroidalDelta(10, 790, W);
+  console.assert(Math.abs(dx) === 20, `3.4: |delta| should be 20, got ${Math.abs(dx)}`);
+  console.assert(dx === -20, `3.4: delta should be -20 (wrap direction), got ${dx}`);
+
+  // Direct path: x=100 to x=300 → delta = +200 (no wrap needed)
+  console.assert(toroidalDelta(100, 300, W) === 200, '3.4: direct delta 100→300 should be 200');
+
+  // Symmetric: delta(a→b) === -delta(b→a)
+  console.assert(toroidalDelta(790, 10, W) === 20, '3.4: reverse delta 790→10 should be +20');
+
+  // Midpoint case: exactly half the dimension — Math.round ties to even (banker's rounding)
+  // but the important invariant is |result| === W/2
+  console.assert(Math.abs(toroidalDelta(0, 400, W)) === 400, '3.4: delta at exactly W/2 has magnitude 400');
+
+  // Delta of 0 for same position
+  console.assert(toroidalDelta(500, 500, W) === 0, '3.4: same position → delta 0');
+
+  console.log('✓ Task 3.4: toroidalDelta shortest-path tests passed');
 }
 
 function setup() {
