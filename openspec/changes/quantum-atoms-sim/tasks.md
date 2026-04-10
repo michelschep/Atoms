@@ -50,7 +50,8 @@
 
 ## 8. Afwerking & Tuning
 
-- [ ] 8.1 Test met standaard aantallen (10 per type = 70 totaal): visueel interessant gedrag?
+- [x] 8.1 Test met standaard aantallen (10 per type = 70 totaal): visueel interessant gedrag?
+  <!-- Bevindingen: alle 10 unit-testgroepen groen. Kracht-analyse: bij gemiddelde afstand ~90px is v_ss ≈ 0.002 px/frame → deeltjes drijven nauwelijks. BOND_THRESHOLD=0.5 nooit haalbaar (max F=0.06) → bindingslijnen renderen nooit. Conclusie: functie correct, maar parameters vereisen tuning (→ 8.2). -->
 - [ ] 8.2 Tune interactiematrix-waarden als deeltjes te veel clusteren of juist vervliegen
 - [ ] 8.3 Controleer performance bij 300 deeltjes (doel: >30fps)
 - [ ] 8.4 Verifieer toroidal wrap visueel: deeltjes aan de rand verschijnen aan de andere kant
