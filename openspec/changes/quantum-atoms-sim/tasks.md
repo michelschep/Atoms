@@ -64,4 +64,9 @@
        (BETA_REPULSE=120) prevents collapse; (3) DAMPING 0.98→0.99 slows velocity decay; (4) tiny thermal noise
        (±0.02 px/frame) in draw() prevents complete freeze in symmetric equilibria.
        Unit test 4.2 updated: MIN_DIST-clamp equality tests replaced by BETA-repulsion gradient tests. -->
-- [ ] 9.2 Het is nog geen torus (of torusoppervlak).
+- [x] 9.2 Het is nog geen torus (of torusoppervlak).
+  <!-- Fix: ghost rendering via drawParticleAt(p, x, y) + drawParticle cross-product approach.
+       When a particle is within RENDER_RADIUS (14px) of any edge, ghost copies are drawn at
+       the wrapped position on the other side. Cross-product of X and Y ghost arrays handles
+       all 4 edges and all 4 corners correctly (up to 4 draws per particle).
+       Bond lines across the boundary still skipped — visually acceptable for now. -->

@@ -765,33 +765,54 @@ function drawBondLines(bonds) {
   noStroke();
 }
 
-// Draws a single particle: large semi-transparent outer glow + bright solid core.
-// Vortaar (type 1) gets an additional orbiting ring of 3 small dots that rotate
-// around the core, visualising its "rotates around its own axis" trait.
-function drawParticle(p) {
+// Outer glow radius — must match the largest circle drawn in drawParticleAt (diameter 28 → radius 14).
+// Ghost copies are rendered when a particle is within this distance of any canvas edge.
+const RENDER_RADIUS = 14;
+
+// Draws a single particle at an arbitrary (x, y) position.
+// Used both for the real position and for ghost copies near canvas edges.
+function drawParticleAt(p, x, y) {
   const c = color(p.color);
   const r = red(c), g = green(c), b = blue(c);
   noStroke();
 
-  // Outer glow — large, very transparent
   fill(r, g, b, 35);
-  circle(p.x, p.y, 28);
+  circle(x, y, 28);
 
-  // Mid glow — medium, semi-transparent
   fill(r, g, b, 80);
-  circle(p.x, p.y, 14);
+  circle(x, y, 14);
 
-  // Bright core
   fill(r, g, b, 220);
-  circle(p.x, p.y, 6);
+  circle(x, y, 6);
 
-  // Vortaar-specific: 3 small dots orbiting the core
   if (p.type === 1) {
     const orbitRadius = 10;
     fill(r, g, b, 160);
     for (let i = 0; i < 3; i++) {
       const ang = p.rotAngle + (i * TWO_PI / 3);
-      circle(p.x + cos(ang) * orbitRadius, p.y + sin(ang) * orbitRadius, 4);
+      circle(x + cos(ang) * orbitRadius, y + sin(ang) * orbitRadius, 4);
+    }
+  }
+}
+
+// Draws a particle at its real position plus ghost copies near canvas edges.
+// Ghost copies make the simulation look like a true torus: a particle exiting the
+// right edge is simultaneously seen entering the left edge, with no teleport jump.
+// Uses a cross-product of X and Y ghost positions to handle all four corners correctly.
+function drawParticle(p) {
+  const W = width, H = height;
+
+  const xs = [p.x];
+  if (p.x < RENDER_RADIUS)          xs.push(p.x + W);
+  else if (p.x > W - RENDER_RADIUS) xs.push(p.x - W);
+
+  const ys = [p.y];
+  if (p.y < RENDER_RADIUS)          ys.push(p.y + H);
+  else if (p.y > H - RENDER_RADIUS) ys.push(p.y - H);
+
+  for (const gx of xs) {
+    for (const gy of ys) {
+      drawParticleAt(p, gx, gy);
     }
   }
 }
