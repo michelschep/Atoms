@@ -52,6 +52,10 @@
 
 - [x] 8.1 Test met standaard aantallen (10 per type = 70 totaal): visueel interessant gedrag?
   <!-- Bevindingen: alle 10 unit-testgroepen groen. Kracht-analyse: bij gemiddelde afstand ~90px is v_ss ≈ 0.002 px/frame → deeltjes drijven nauwelijks. BOND_THRESHOLD=0.5 nooit haalbaar (max F=0.06) → bindingslijnen renderen nooit. Conclusie: functie correct, maar parameters vereisen tuning (→ 8.2). -->
-- [ ] 8.2 Tune interactiematrix-waarden als deeltjes te veel clusteren of juist vervliegen
+- [x] 8.2 Tune interactiematrix-waarden als deeltjes te veel clusteren of juist vervliegen
+  <!-- Oplossing: FORCE_SCALE=400 toegevoegd. Krachten zijn nu 400× sterker: deeltjes bereiken maxSpeed bij middellange afstanden, bonds vormen zich wanneer sterke paren binnen ~35–55 px zijn. Unit-tests bijgewerkt: stale "bonds kunnen nooit vormen" commentaar verwijderd, expliciete no-bond (d=100) en bond-vormt (Nullon-Gravon d=5) cases toegevoegd, invariant-check aangepast om FORCE_SCALE mee te nemen. -->
 - [ ] 8.3 Controleer performance bij 300 deeltjes (doel: >30fps)
 - [ ] 8.4 Verifieer toroidal wrap visueel: deeltjes aan de rand verschijnen aan de andere kant
+
+## 9. Bugs
+- [ ] 9.1 Alle particles staan heel snel stil en er gebeurt daarna bijna niks
