@@ -645,6 +645,17 @@ function setup() {
   canvas.parent('canvas-container');
   colorMode(RGB, 255);
   initParticles();
+
+  const pauseBtn = document.getElementById('pause-btn');
+  pauseBtn.addEventListener('click', () => {
+    if (isLooping()) {
+      noLoop();
+      pauseBtn.textContent = '▶ Play';
+    } else {
+      loop();
+      pauseBtn.textContent = '⏸ Pause';
+    }
+  });
 }
 
 // Draws semi-transparent bond lines between strongly-interacting particle pairs.
