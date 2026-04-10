@@ -1,11 +1,11 @@
 const PARTICLE_TYPES = [
-  { id: 0, name: 'Lumion',  color: '#FFD700', mass: 1.0, maxSpeed: 3.5 },
-  { id: 1, name: 'Vortaar', color: '#4169E1', mass: 2.0, maxSpeed: 2.0 },
-  { id: 2, name: 'Nullon',  color: '#C0C0C0', mass: 1.5, maxSpeed: 2.5 },
-  { id: 3, name: 'Phasex',  color: '#8B00FF', mass: 1.0, maxSpeed: 3.0 },
-  { id: 4, name: 'Gravon',  color: '#8B0000', mass: 4.0, maxSpeed: 0.8 },
-  { id: 5, name: 'Chromax', color: '#00CED1', mass: 1.5, maxSpeed: 2.8 },
-  { id: 6, name: 'Fluxar',  color: '#FF6600', mass: 1.0, maxSpeed: 4.0 },
+  { id: 0, name: 'Lumion',  color: '#FFD700', mass: 1.0, maxSpeed: 3.5, description: 'Glows brightly; attracts other Lumions from a distance.' },
+  { id: 1, name: 'Vortaar', color: '#4169E1', mass: 2.0, maxSpeed: 2.0, description: 'Rotates slowly on its own axis; draws Lumions in.' },
+  { id: 2, name: 'Nullon',  color: '#C0C0C0', mass: 1.5, maxSpeed: 2.5, description: 'Neutral by nature; strongly attracted to Gravon.' },
+  { id: 3, name: 'Phasex',  color: '#8B00FF', mass: 1.0, maxSpeed: 3.0, description: 'Oscillates between attraction and repulsion.' },
+  { id: 4, name: 'Gravon',  color: '#8B0000', mass: 4.0, maxSpeed: 0.8, description: 'Heavy and slow; weakly attracts everything nearby.' },
+  { id: 5, name: 'Chromax', color: '#00CED1', mass: 1.5, maxSpeed: 2.8, description: 'Clusters together; pulled toward Phasex.' },
+  { id: 6, name: 'Fluxar',  color: '#FF6600', mass: 1.0, maxSpeed: 4.0, description: 'Chaotic: force sign flips every ~2 seconds.' },
 ];
 
 // ±phase: resolved at runtime via Phasex sin() oscillation
@@ -692,6 +692,38 @@ function buildSliderUI() {
   return refs;
 }
 
+// Builds the legend UI for all particle types in the #legend container.
+// Each item shows a color dot, the type name, and a short behaviour description.
+function buildLegendUI() {
+  const container = document.getElementById('legend');
+
+  for (const t of PARTICLE_TYPES) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+
+    const dot = document.createElement('span');
+    dot.className = 'legend-dot';
+    dot.style.background = t.color;
+
+    const text = document.createElement('div');
+    text.className = 'legend-text';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'legend-name';
+    nameEl.textContent = t.name;
+
+    const descEl = document.createElement('span');
+    descEl.className = 'legend-desc';
+    descEl.textContent = t.description;
+
+    text.appendChild(nameEl);
+    text.appendChild(descEl);
+    item.appendChild(dot);
+    item.appendChild(text);
+    container.appendChild(item);
+  }
+}
+
 let sliderRefs = [];
 
 function setup() {
@@ -701,6 +733,7 @@ function setup() {
   initParticles();
 
   sliderRefs = buildSliderUI();
+  buildLegendUI();
 
   const pauseBtn = document.getElementById('pause-btn');
   pauseBtn.addEventListener('click', () => {
