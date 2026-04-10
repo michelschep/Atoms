@@ -9,7 +9,7 @@
 
 - [x] 2.1 Definieer `PARTICLE_TYPES` array met de 7 typen (naam, kleur, massa, maxSpeed)
 - [x] 2.2 Definieer `INTERACTION_MATRIX[7][7]` met alle krachtswaarden uit de spec
-- [ ] 2.3 Implementeer Phasex `phaseOffset` en fase-berekening via `sin()`
+- [x] 2.3 Implementeer Phasex `phaseOffset` en fase-berekening via `sin()`
 - [ ] 2.4 Implementeer Fluxar `chaosSign` en `chaosTick` flip-logica (elke 120 frames)
 - [ ] 2.5 Implementeer `getForceStrength(typeA, typeB, frameCount)` functie die matrix opzoekt en phase/chaos verwerkt
 
