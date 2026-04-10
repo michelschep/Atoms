@@ -73,6 +73,32 @@ function tickFluxar(particle) {
   }
 }
 
+// Returns the resolved force strength between two particles at a given frameCount.
+// Resolves PHASE tokens using the Phasex particle's phaseOffset,
+// and CHAOS tokens using the Fluxar particle's chaosSign (base value 1.0).
+function getForceStrength(particleA, particleB, frameCount) {
+  const raw = INTERACTION_MATRIX[particleA.type][particleB.type];
+
+  if (typeof raw === 'number') return raw;
+
+  if (raw === PHASE) {
+    // If both are Phasex, average their offsets for a mixed oscillation
+    if (particleA.type === 3 && particleB.type === 3) {
+      const avgOffset = (particleA.phaseOffset + particleB.phaseOffset) / 2;
+      return Math.sin(frameCount * 0.02 + avgOffset);
+    }
+    const phasex = particleA.type === 3 ? particleA : particleB;
+    return Math.sin(frameCount * 0.02 + phasex.phaseOffset);
+  }
+
+  if (raw === CHAOS) {
+    const fluxar = particleA.type === 6 ? particleA : particleB;
+    return fluxar.chaosSign; // base value 1.0
+  }
+
+  return 0;
+}
+
 // --- Unit tests (run at load time) ---
 {
   _nextPhasexOffset = 0; // reset for reproducible tests
@@ -120,6 +146,53 @@ function tickFluxar(particle) {
   console.assert(lumion.chaosSign === undefined, '2.4: tickFluxar on non-Fluxar should be no-op');
 
   console.log('✓ Task 2.4: Fluxar chaosSign and chaosTick tests passed');
+}
+
+// --- Unit tests for task 2.5 ---
+{
+  _nextPhasexOffset = 0;
+  const lumion  = createParticle(0, 0, 0);
+  const vortaar = createParticle(1, 0, 0);
+  const nullon  = createParticle(2, 0, 0);
+  const phasex1 = createParticle(3, 0, 0);
+  const phasex2 = createParticle(3, 0, 0);
+  const gravon  = createParticle(4, 0, 0);
+  const chromax = createParticle(5, 0, 0);
+  const fluxar  = createParticle(6, 0, 0);
+
+  // Numeric matrix entries are returned as-is
+  console.assert(getForceStrength(lumion, lumion, 0)   === 0.8,  '2.5: Lumion-Lumion = 0.8');
+  console.assert(getForceStrength(lumion, vortaar, 0)  === 1.2,  '2.5: Lumion-Vortaar = 1.2');
+  console.assert(getForceStrength(gravon, gravon, 0)   === -1.0, '2.5: Gravon-Gravon = -1.0');
+  console.assert(getForceStrength(nullon, lumion, 0)   === -0.3, '2.5: Nullon-Lumion = -0.3');
+
+  // Matrix symmetry
+  console.assert(getForceStrength(vortaar, lumion, 0)  === getForceStrength(lumion, vortaar, 0), '2.5: Matrix is symmetric for numeric values');
+
+  // PHASE: result must be in [-1, 1]
+  const pStrength = getForceStrength(phasex1, lumion, 100);
+  console.assert(pStrength >= -1 && pStrength <= 1, '2.5: PHASE strength in [-1,1]');
+  // Reverse order should give same value (same Phasex particle)
+  console.assert(getForceStrength(lumion, phasex1, 100) === pStrength, '2.5: PHASE is symmetric for same Phasex particle');
+  // Two different Phasex particles produce different strengths at the same frameCount
+  const p1p1 = getForceStrength(phasex1, phasex1, 50);
+  const p1p2 = getForceStrength(phasex1, phasex2, 50);
+  console.assert(typeof p1p1 === 'number' && p1p1 >= -1 && p1p1 <= 1, '2.5: Phasex-Phasex PHASE in [-1,1]');
+  console.assert(p1p1 !== p1p2, '2.5: Phasex-Phasex and Phasex-Phasex2 differ (different offsets)');
+
+  // CHAOS: result equals chaosSign of the Fluxar particle
+  fluxar.chaosSign = 1;
+  console.assert(getForceStrength(fluxar, lumion, 0)  === 1,  '2.5: CHAOS chaosSign=+1 → +1');
+  console.assert(getForceStrength(lumion, fluxar, 0)  === 1,  '2.5: CHAOS symmetric chaosSign=+1');
+  fluxar.chaosSign = -1;
+  console.assert(getForceStrength(fluxar, lumion, 0)  === -1, '2.5: CHAOS chaosSign=-1 → -1');
+  console.assert(getForceStrength(vortaar, fluxar, 0) === -1, '2.5: CHAOS Vortaar-Fluxar chaosSign=-1');
+
+  // Zero entries stay zero
+  console.assert(getForceStrength(lumion, chromax, 0) === 0.0, '2.5: Lumion-Chromax = 0.0');
+
+  _nextPhasexOffset = 0; // reset so simulation starts fresh
+  console.log('✓ Task 2.5: getForceStrength tests passed');
 }
 
 function setup() {

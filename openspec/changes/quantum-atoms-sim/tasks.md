@@ -11,7 +11,7 @@
 - [x] 2.2 Definieer `INTERACTION_MATRIX[7][7]` met alle krachtswaarden uit de spec
 - [x] 2.3 Implementeer Phasex `phaseOffset` en fase-berekening via `sin()`
 - [x] 2.4 Implementeer Fluxar `chaosSign` en `chaosTick` flip-logica (elke 120 frames)
-- [ ] 2.5 Implementeer `getForceStrength(typeA, typeB, frameCount)` functie die matrix opzoekt en phase/chaos verwerkt
+- [x] 2.5 Implementeer `getForceStrength(typeA, typeB, frameCount)` functie die matrix opzoekt en phase/chaos verwerkt
 
 ## 3. Toroidale Ruimte
 
