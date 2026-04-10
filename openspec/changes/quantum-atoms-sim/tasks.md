@@ -37,7 +37,7 @@
 
 ## 6. Rendering
 
-- [ ] 6.1 Implementeer `drawParticle(p)` met outer-glow (grote semi-transparante cirkel) en kern
+- [x] 6.1 Implementeer `drawParticle(p)` met outer-glow (grote semi-transparante cirkel) en kern
 - [ ] 6.2 Voeg Vortaar rotatie-visualisatie toe (klein draaiend element om het deeltje)
 - [ ] 6.3 Implementeer `drawBondLines(bonds)` met semi-transparante gemixte kleurlijnen
 

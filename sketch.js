@@ -659,13 +659,24 @@ function drawBondLines(bonds) {
   noStroke();
 }
 
-// Draws a single particle as a coloured circle.
-// Outer glow and Vortaar rotation visualisation are added in tasks 6.1 and 6.2.
+// Draws a single particle: large semi-transparent outer glow + bright solid core.
+// Vortaar rotation visualisation is added in task 6.2.
 function drawParticle(p) {
   const c = color(p.color);
+  const r = red(c), g = green(c), b = blue(c);
   noStroke();
-  fill(red(c), green(c), blue(c), 220);
-  circle(p.x, p.y, 8);
+
+  // Outer glow — large, very transparent
+  fill(r, g, b, 35);
+  circle(p.x, p.y, 28);
+
+  // Mid glow — medium, semi-transparent
+  fill(r, g, b, 80);
+  circle(p.x, p.y, 14);
+
+  // Bright core
+  fill(r, g, b, 220);
+  circle(p.x, p.y, 6);
 }
 
 function draw() {
