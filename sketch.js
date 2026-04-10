@@ -195,6 +195,52 @@ function getForceStrength(particleA, particleB, frameCount) {
   console.log('✓ Task 2.5: getForceStrength tests passed');
 }
 
+// Wraps a particle's position to stay within [0, w) × [0, h).
+// Optional w/h default to p5.js globals (set after setup); pass explicit
+// values in load-time unit tests where the globals are not yet available.
+function wrapPosition(particle, w = width, h = height) {
+  particle.x = ((particle.x % w) + w) % w;
+  particle.y = ((particle.y % h) + h) % h;
+}
+
+// --- Unit tests for task 3.1 / 3.3 ---
+{
+  const W = 900, H = 700;
+  const p = { x: 0, y: 0 };
+
+  // Right edge: exactly at canvas width wraps to 0
+  p.x = 900; p.y = 350;
+  wrapPosition(p, W, H);
+  console.assert(p.x === 0, '3.1: x=900 should wrap to 0');
+
+  // Beyond right edge
+  p.x = 950; p.y = 350;
+  wrapPosition(p, W, H);
+  console.assert(p.x === 50, '3.1: x=950 should wrap to 50');
+
+  // Left edge (negative)
+  p.x = -10; p.y = 350;
+  wrapPosition(p, W, H);
+  console.assert(p.x === 890, '3.3: x=-10 should wrap to 890');
+
+  // Bottom edge: exactly at canvas height wraps to 0
+  p.x = 450; p.y = 700;
+  wrapPosition(p, W, H);
+  console.assert(p.y === 0, '3.1: y=700 should wrap to 0');
+
+  // Top edge (negative)
+  p.x = 450; p.y = -5;
+  wrapPosition(p, W, H);
+  console.assert(p.y === 695, '3.3: y=-5 should wrap to 695');
+
+  // Value well inside bounds stays unchanged
+  p.x = 400; p.y = 300;
+  wrapPosition(p, W, H);
+  console.assert(p.x === 400 && p.y === 300, '3.1: in-bounds position unchanged');
+
+  console.log('✓ Tasks 3.1 + 3.3: wrapPosition and edge-wrap tests passed');
+}
+
 function setup() {
   const canvas = createCanvas(900, 700);
   canvas.parent('canvas-container');

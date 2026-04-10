@@ -15,9 +15,9 @@
 
 ## 3. Toroidale Ruimte
 
-- [ ] 3.1 Implementeer `wrapPosition(particle)` die x/y modulo canvas-grootte zet
+- [x] 3.1 Implementeer `wrapPosition(particle)` die x/y modulo canvas-grootte zet
 - [ ] 3.2 Implementeer `toroidalDelta(a, b, dim)` voor minimum-image afstandsberekening
-- [ ] 3.3 Schrijf unit-test (console.assert) voor de wrap aan linker/rechter rand
+- [x] 3.3 Schrijf unit-test (console.assert) voor de wrap aan linker/rechter rand
 - [ ] 3.4 Schrijf unit-test voor het kortste-pad scenario (deeltje op x=10 en x=790, canvas 800px)
 
 ## 4. Force Engine
